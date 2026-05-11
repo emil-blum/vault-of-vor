@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Vault of Vör</title>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     WELCOME OVERLAY
+══════════════════════════════════════ -->
+<div id="welcome">
+  <div class="welcome-card">
+    <div class="welcome-scroll-area">
+
+      <div class="welcome-logo">
+        <i data-lucide="eye"></i>
+        <span>Vault of Vör</span>
+      </div>
+
+      <div class="welcome-headline">
+        <h1>Hide what must<br>remain hidden.</h1>
+        <p>Vault of Vör lets you conceal encrypted messages — text or audio — inside any image. Military-grade AES-GCM encryption, zero servers, runs entirely in your browser.</p>
+      </div>
+
+      <div class="welcome-cases">
+        <div class="case-card">
+          <div class="case-icon"><i data-lucide="briefcase"></i></div>
+          <h3>Cold Storage</h3>
+          <p>Store seed phrases or passwords as image files. Anyone who finds them sees static noise.</p>
+        </div>
+        <div class="case-card">
+          <div class="case-icon"><i data-lucide="coffee"></i></div>
+          <h3>Private Comms</h3>
+          <p>Bypass keyword filters on monitored networks. The network only sees an image.</p>
+        </div>
+        <div class="case-card">
+          <div class="case-icon"><i data-lucide="share-2"></i></div>
+          <h3>Dead Drops</h3>
+          <p>Post the image publicly. Only your recipient knows it carries a message.</p>
+        </div>
+      </div>
+
+      <div class="welcome-credit">
+        <p class="credit-privacy"><i data-lucide="shield-check"></i> 100% Client-Side. No data sent to any server.</p>
+        <p class="credit-author">Created by <a href="https://emilblum.com/" target="_blank" rel="noopener">Emīl Blūm</a> with the help of Gemini &amp; Claude</p>
+      </div>
+
+    </div>
+
+    <div class="welcome-footer">
+      <div class="welcome-footer-fade"></div>
+      <button class="btn btn-primary" id="btn-welcome-enter">
+        <i data-lucide="lock"></i>
+        Enter the Vault
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     APP
+══════════════════════════════════════ -->
+<div id="app">
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">
+      <i data-lucide="eye"></i>
+      <span>Vault of Vör</span>
+    </div>
+
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="tab-encode">Encode</button>
+      <button class="nav-tab" id="tab-decode">Decode</button>
+      <button class="nav-tab" id="tab-guide">Guide</button>
+    </div>
+
+    <div class="nav-right">
+      <button class="btn-theme" id="btn-theme" aria-label="Toggle theme">
+        <i data-lucide="sun" id="theme-icon-light" class="hidden"></i>
+        <i data-lucide="moon" id="theme-icon-dark"></i>
+        <i data-lucide="monitor" id="theme-icon-system" class="hidden"></i>
+      </button>
+      <button class="btn btn-ghost" id="btn-save-offline">
+        <i data-lucide="download"></i>
+        Save App Locally
+      </button>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- ══ ENCODE VIEW ══ -->
+    <div id="view-encode" class="view active">
+      <div class="encode-inner">
+
+        <!-- Image upload area -->
+        <div id="encode-upload-zone" class="upload-zone">
+          <input type="file" id="imgUpload" accept="image/*">
+          <div class="uz-icon"><i data-lucide="image"></i></div>
+          <p class="uz-title">Drop image here</p>
+          <p class="uz-sub">or click to select — PNG, JPG, WEBP accepted</p>
+        </div>
+
+        <div id="encode-preview-wrap" class="encode-preview-wrap hidden">
+          <img id="encode-preview-img" alt="Cover image">
+          <div class="encode-preview-bar">
+            <div class="file-badge-inline">
+              <i data-lucide="image"></i>
+              <span id="encode-file-name"></span>
+            </div>
+            <div class="capacity-inline">
+              <span class="capacity-label">Estimated Capacity</span>
+              <span class="capacity-val" id="capacityText"></span>
+            </div>
+            <button class="btn-icon-sm" id="btn-clear-image" aria-label="Remove image">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Message + Encryption -->
+        <div class="encode-controls">
+
+          <div class="ctrl-section">
+            <div class="ctrl-label"><i data-lucide="lock"></i> Secret Message</div>
+
+            <div class="msg-tabs">
+              <button class="msg-tab active" id="msg-tab-text">
+                <i data-lucide="type"></i> Text
+              </button>
+              <button class="msg-tab" id="msg-tab-audio">
+                <i data-lucide="mic"></i> Voice Note
+              </button>
+            </div>
+
+            <div id="msg-text-area">
+              <textarea id="secretText" placeholder="Type your message here…" spellcheck="false"></textarea>
+              <div class="char-count" id="charCount">0 characters</div>
+            </div>
+
+            <div id="msg-audio-area" class="hidden">
+              <div class="audio-rec-box" id="rec-idle">
+                <div class="rec-ring" id="btn-rec-start">
+                  <i data-lucide="mic"></i>
+                </div>
+                <span class="rec-hint">Tap to record</span>
+              </div>
+
+              <div class="audio-rec-box hidden" id="rec-recording">
+                <canvas id="rec-waveform" class="rec-waveform"></canvas>
+                <div class="rec-ring recording" id="btn-rec-stop">
+                  <i data-lucide="square"></i>
+                </div>
+                <span id="rec-timer" class="rec-timer">0:00</span>
+                <span class="rec-hint">Tap to stop</span>
+              </div>
+
+              <div class="hidden" id="rec-done">
+                <div class="player-wrap">
+                  <button class="play-btn" id="btn-play-preview">
+                    <i data-lucide="play" id="icon-play-pre"></i>
+                    <i data-lucide="pause" id="icon-pause-pre" class="hidden"></i>
+                  </button>
+                  <div id="time-pre" class="time-disp">0:00</div>
+                  <input type="range" id="seek-pre" value="0" max="100" style="flex:1;">
+                </div>
+                <audio id="audioPreview" class="hidden"></audio>
+                <button id="btn-rec-reset" class="discard-btn">
+                  <i data-lucide="rotate-ccw"></i> Discard &amp; re-record
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ctrl-section">
+            <div class="ctrl-label"><i data-lucide="key"></i> Encryption</div>
+            <div class="password-row">
+              <input type="password" id="encodePassword" placeholder="Password (required)" autocomplete="new-password">
+              <button class="btn-icon-sm" id="btn-toggle-pw-encode" aria-label="Show password">
+                <i data-lucide="eye" id="pw-eye-encode"></i>
+                <i data-lucide="eye-off" id="pw-eye-off-encode" class="hidden"></i>
+              </button>
+            </div>
+            <p class="pw-hint hidden" id="pw-hint-encode">
+              <i data-lucide="alert-triangle"></i>
+              A password is required to protect your message.
+            </p>
+            <button class="btn btn-primary" id="encodeBtn">
+              <i data-lucide="file-down"></i>
+              Encode &amp; Save Image
+            </button>
+            <p class="encode-note">Saves as PNG. Do not convert or compress.</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══ DECODE VIEW ══ -->
+    <div id="view-decode" class="view">
+      <div class="decode-card fade-in">
+        <div class="decode-header">
+          <div class="decode-icon"><i data-lucide="eye"></i></div>
+          <h2>Reveal a Message</h2>
+          <p>Upload a Vault of Vör encoded PNG to decrypt it.</p>
+        </div>
+
+        <div class="drop-zone" id="dropZone">
+          <input type="file" id="decodeFile" accept="image/png">
+          <div class="dz-icon"><i data-lucide="upload"></i></div>
+          <p>Drop PNG here or click to select</p>
+          <small>Only PNG files retain hidden data</small>
+        </div>
+
+        <div id="decode-preview-wrap" class="decode-preview-wrap hidden">
+          <img id="decode-preview-img" alt="Encoded image">
+          <div class="encode-preview-bar">
+            <div class="file-badge-inline">
+              <i data-lucide="image"></i>
+              <span id="decode-file-name"></span>
+            </div>
+            <button class="btn-icon-sm" id="btn-clear-decode" aria-label="Remove image">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+        </div>
+
+        <div id="passwordSection" class="hidden fade-in">
+          <p class="pw-warning">
+            <i data-lucide="shield"></i>
+            Enter the password this message was encoded with.
+          </p>
+          <div class="password-row">
+            <input type="password" id="decodePassword" placeholder="Enter password">
+            <button class="btn-icon-sm" id="btn-toggle-pw-decode" aria-label="Show password">
+              <i data-lucide="eye" id="pw-eye-decode"></i>
+              <i data-lucide="eye-off" id="pw-eye-off-decode" class="hidden"></i>
+            </button>
+          </div>
+          <button class="btn btn-accent" id="btn-decrypt">
+            <i data-lucide="unlock"></i>
+            Decrypt Message
+          </button>
+        </div>
+
+        <div id="decryptLoading" class="loader-box hidden">
+          <div class="spinner"></div>
+          <span>Deciphering…</span>
+        </div>
+
+        <div id="decryptResult" class="hidden"></div>
+
+        <div id="decryptError" class="error-box hidden">
+          <i data-lucide="alert-circle"></i>
+          <span id="decryptErrorText">Decryption failed.</span>
+        </div>
+      </div>
+
+      <canvas id="decodeCanvas" class="hidden"></canvas>
+    </div>
+
+
+    <!-- ══ GUIDE VIEW ══ -->
+    <div id="view-guide" class="view">
+      <div class="guide-content">
+
+        <div class="offline-card">
+          <div>
+            <p><strong>Use Vault of Vör offline</strong></p>
+            <p>Download this file and open it from your device — no internet needed.</p>
+          </div>
+          <button class="btn btn-accent" id="btn-guide-download">
+            <i data-lucide="download"></i>
+            Download
+          </button>
+        </div>
+
+        <div class="guide-card">
+          <h3><i data-lucide="info"></i> How It Works</h3>
+          <ul>
+            <li><strong>Encryption:</strong> Your message is encrypted with AES-GCM (256-bit), derived via PBKDF2 with 100,000 iterations. Without the password, the data is mathematically irrecoverable.</li>
+            <li><strong>Steganography:</strong> The encrypted bytes are hidden in the least-significant bits of each pixel's RGB channels. The image looks identical to the human eye.</li>
+            <li><strong>Zero-knowledge:</strong> All processing happens in your browser. No data is transmitted anywhere.</li>
+          </ul>
+        </div>
+
+        <div class="guide-card accent-border">
+          <h3><i data-lucide="alert-triangle"></i> The Golden Rules</h3>
+          <ul>
+            <li><span class="warn">Always</span> save and share as <strong>PNG</strong>. Never convert to JPG, WEBP, or AVIF.</li>
+            <li><strong>Never screenshot</strong> the encoded image — screenshots re-compress pixels and destroy the hidden data.</li>
+            <li><strong>Do not edit</strong> the PNG in other software after encoding.</li>
+          </ul>
+        </div>
+
+        <div class="guide-card">
+          <h3><i data-lucide="phone"></i> Sending Safely</h3>
+          <ul>
+            <li>On WhatsApp, Telegram, Discord — send as <strong>"File"</strong> or <strong>"Document"</strong>, not as a Photo. Photos get compressed automatically.</li>
+            <li>Email attachments preserve PNG files correctly.</li>
+            <li><strong>Security tip:</strong> Send the image and the password via different channels.</li>
+          </ul>
+        </div>
+
+        <div class="guide-card">
+          <h3><i data-lucide="shield"></i> About Vör</h3>
+          <ul>
+            <li>In Norse mythology, <strong>Vör</strong> is the goddess of awareness — "so wise and searching that nothing can be concealed from her." The name means <em>aware</em> or <em>careful</em>.</li>
+            <li>This tool is named in her honour: a vault that hides information in plain sight, revealing it only to those with the awareness to look — and a key.</li>
+          </ul>
+        </div>
+
+        <div class="guide-footer">
+          <p><i data-lucide="shield-check"></i> 100% Client-Side. No data sent to any server.</p>
+          <p>Created by <a href="https://emilblum.com/" target="_blank" rel="noopener">Emīl Blūm</a> with the help of Gemini &amp; Claude</p>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
