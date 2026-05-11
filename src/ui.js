@@ -3,7 +3,13 @@ import { pauseAll } from './audio.js'
 // ─── Welcome (always shown) ──────────────────────────────────────────────────
 
 export function initWelcome() {
-  document.getElementById('btn-welcome-enter').addEventListener('click', dismissWelcome)
+  const btn = document.getElementById('btn-welcome-enter')
+  if (!btn) {
+    // Welcome was already removed (e.g. stale DOM snapshot) — ensure app is visible
+    document.getElementById('app')?.classList.add('visible')
+    return
+  }
+  btn.addEventListener('click', dismissWelcome)
 }
 
 function dismissWelcome() {
@@ -56,14 +62,18 @@ function applyTheme(theme) {
 }
 
 // ─── Offline download ────────────────────────────────────────────────────────
+// cleanHtml is captured in main.js before any DOM mutations (icon replacement,
+// welcome removal, etc.), so the downloaded file is always a pristine copy.
 
-export function initOfflineDownload() {
-  document.getElementById('btn-save-offline').addEventListener('click', downloadOffline)
+let _cleanHtml = null
+
+export function initOfflineDownload(cleanHtml) {
+  _cleanHtml = cleanHtml
   document.getElementById('btn-guide-download').addEventListener('click', downloadOffline)
 }
 
 export function downloadOffline() {
-  const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML
+  const html = _cleanHtml || '<!DOCTYPE html>\n' + document.documentElement.outerHTML
   const blob = new Blob([html], { type: 'text/html' })
   const a    = document.createElement('a')
   a.href     = URL.createObjectURL(blob)

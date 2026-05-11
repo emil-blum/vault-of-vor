@@ -66,27 +66,25 @@
 
   <!-- NAV -->
   <nav>
-    <div class="nav-logo">
-      <i data-lucide="eye"></i>
-      <span>Vault of Vör</span>
-    </div>
-
-    <div class="nav-tabs">
-      <button class="nav-tab active" id="tab-encode">Encode</button>
-      <button class="nav-tab" id="tab-decode">Decode</button>
-      <button class="nav-tab" id="tab-guide">Guide</button>
-    </div>
-
-    <div class="nav-right">
+    <div class="nav-left">
       <button class="btn-theme" id="btn-theme" aria-label="Toggle theme">
         <i data-lucide="sun" id="theme-icon-light" class="hidden"></i>
         <i data-lucide="moon" id="theme-icon-dark"></i>
         <i data-lucide="monitor" id="theme-icon-system" class="hidden"></i>
       </button>
-      <button class="btn btn-ghost" id="btn-save-offline">
-        <i data-lucide="download"></i>
-        Save App Locally
-      </button>
+    </div>
+
+    <div class="nav-center">
+      <span class="nav-title-main">Vault of Vör</span>
+      <span class="nav-title-sub">Encrypted Image Steganography</span>
+    </div>
+
+    <div class="nav-right">
+      <div class="nav-tabs">
+        <button class="nav-tab active" id="tab-encode">Encode</button>
+        <button class="nav-tab" id="tab-decode">Decode</button>
+        <button class="nav-tab" id="tab-guide">Guide</button>
+      </div>
     </div>
   </nav>
 
@@ -100,8 +98,9 @@
         <div id="encode-upload-zone" class="upload-zone">
           <input type="file" id="imgUpload" accept="image/*">
           <div class="uz-icon"><i data-lucide="image"></i></div>
-          <p class="uz-title">Drop image here</p>
-          <p class="uz-sub">or click to select — PNG, JPG, WEBP accepted</p>
+          <p class="uz-title">Upload an image to hide message inside</p>
+          <p class="uz-sub">Drop image here or click to select</p>
+          <p class="uz-sub">PNG, JPG, WEBP image formats accepted</p>
         </div>
 
         <div id="encode-preview-wrap" class="encode-preview-wrap hidden">
@@ -125,7 +124,7 @@
         <div class="encode-controls">
 
           <div class="ctrl-section">
-            <div class="ctrl-label"><i data-lucide="lock"></i> Secret Message</div>
+            <div class="ctrl-label"><i data-lucide="lock"></i> Your Message</div>
 
             <div class="msg-tabs">
               <button class="msg-tab active" id="msg-tab-text">
@@ -176,7 +175,7 @@
           </div>
 
           <div class="ctrl-section">
-            <div class="ctrl-label"><i data-lucide="key"></i> Encryption</div>
+            <div class="ctrl-label"><i data-lucide="key"></i> Encryption Password <span class="ctrl-label-note">(case sensitive)</span></div>
             <div class="password-row">
               <input type="password" id="encodePassword" placeholder="Password (required)" autocomplete="new-password">
               <button class="btn-icon-sm" id="btn-toggle-pw-encode" aria-label="Show password">
@@ -188,6 +187,12 @@
               <i data-lucide="alert-triangle"></i>
               A password is required to protect your message.
             </p>
+            <div class="crypto-tag">
+              Uses PBKDF2 + AES-GCM
+              <a href="https://www.google.com/search?q=What+is+PBKDF2+AES-GCM+encryption" target="_blank" rel="noopener" aria-label="Learn more about PBKDF2 + AES-GCM">
+                <i data-lucide="circle-help"></i>
+              </a>
+            </div>
             <button class="btn btn-primary" id="encodeBtn">
               <i data-lucide="file-down"></i>
               Encode &amp; Save Image
@@ -268,17 +273,6 @@
     <div id="view-guide" class="view">
       <div class="guide-content">
 
-        <div class="offline-card">
-          <div>
-            <p><strong>Use Vault of Vör offline</strong></p>
-            <p>Download this file and open it from your device — no internet needed.</p>
-          </div>
-          <button class="btn btn-accent" id="btn-guide-download">
-            <i data-lucide="download"></i>
-            Download
-          </button>
-        </div>
-
         <div class="guide-card">
           <h3><i data-lucide="info"></i> How It Works</h3>
           <ul>
@@ -312,6 +306,17 @@
             <li>In Norse mythology, <strong>Vör</strong> is the goddess of awareness — "so wise and searching that nothing can be concealed from her." The name means <em>aware</em> or <em>careful</em>.</li>
             <li>This tool is named in her honour: a vault that hides information in plain sight, revealing it only to those with the awareness to look — and a key.</li>
           </ul>
+        </div>
+
+        <div class="offline-card">
+          <div>
+            <p><strong>Use Vault of Vör offline</strong></p>
+            <p>Download this file and open it from your device — no internet needed.</p>
+          </div>
+          <button class="btn btn-accent" id="btn-guide-download">
+            <i data-lucide="download"></i>
+            Download
+          </button>
         </div>
 
         <div class="guide-footer">
