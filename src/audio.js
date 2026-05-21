@@ -146,8 +146,8 @@ function drawWaveform() {
     const val  = data[i]
     const barH = Math.max(2, (val / 255) * h * 0.85)
     const x    = i * (barW + gap)
-    const alpha = 0.25 + (val / 255) * 0.45
-    ctx.fillStyle = `rgba(239,68,68,${alpha.toFixed(2)})`
+    const alpha = 0.25 + (val / 255) * 0.5
+    ctx.fillStyle = `rgba(188,0,0,${alpha.toFixed(2)})`
     // Round the top of each bar
     const r = Math.min(barW / 2, barH / 2, 2)
     ctx.beginPath()

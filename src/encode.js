@@ -2,6 +2,8 @@ import { encryptData }                         from './crypto.js'
 import { embedData }                            from './steganography.js'
 import { getCompositeImageData, getCapacityBytes, getLoadedImage } from './canvas.js'
 import { msgMode, getRecordedBlob }             from './audio.js'
+import { playScatter }                          from './effects.js'
+import { attachRuneBtn }                        from './runes.js'
 
 export function initEncode() {
   document.getElementById('encodeBtn').addEventListener('click', handleEncode)
@@ -51,12 +53,17 @@ async function handleEncode() {
   }
 
   const btn          = document.getElementById('encodeBtn')
+  const previewWrap  = document.getElementById('encode-preview-wrap')
   const originalHTML = btn.innerHTML
   btn.disabled       = true
   btn.textContent    = 'Encoding…'
 
   try {
-    const encrypted = await encryptData(rawData, password)
+    // Run scatter effect and encryption in parallel — both must finish before download
+    const [, encrypted] = await Promise.all([
+      playScatter(previewWrap, 800),
+      encryptData(rawData, password),
+    ])
 
     const lenHeader = new Uint8Array(4)
     new DataView(lenHeader.buffer).setUint32(0, encrypted.byteLength)
@@ -91,6 +98,8 @@ async function handleEncode() {
         btn.disabled  = false
         btn.innerHTML = originalHTML
         window.__lucideCreateIcons?.()
+        // Re-attach rune effect to the restored button
+        attachRuneBtn(btn)
       }, 3000)
     }, 'image/png')
 
@@ -98,6 +107,8 @@ async function handleEncode() {
     showEncodeStatus(e.message || 'Encoding failed.', 'error')
     btn.disabled  = false
     btn.innerHTML = originalHTML
+    window.__lucideCreateIcons?.()
+    attachRuneBtn(btn)
   }
 }
 

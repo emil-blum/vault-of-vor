@@ -2,6 +2,7 @@ import { decryptData }   from './crypto.js'
 import { extractData }   from './steganography.js'
 import { escapeHtml }    from './ui.js'
 import { formatTime }    from './audio.js'
+import { playScatter }   from './effects.js'
 
 let loadedEncryptedBuf = null
 let decodedPlaying     = false
@@ -26,7 +27,6 @@ export function initDecode() {
     document.getElementById('pw-eye-off-decode').classList.toggle('hidden', isText)
   })
 
-  // Drag & drop on the drop zone
   const dz = document.getElementById('dropZone')
   dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('drag-over') })
   dz.addEventListener('dragleave', ()  => dz.classList.remove('drag-over'))
@@ -43,7 +43,6 @@ function processFile(file) {
 
   const reader = new FileReader()
   reader.onload = evt => {
-    // Show image preview
     document.getElementById('decode-preview-img').src = evt.target.result
     document.getElementById('decode-file-name').textContent = file.name
     document.getElementById('dropZone').classList.add('hidden')
@@ -87,8 +86,15 @@ async function triggerDecrypt() {
   showLoading(true)
   hideError()
 
+  const previewWrap = document.getElementById('decode-preview-wrap')
+
   try {
-    const raw     = await decryptData(loadedEncryptedBuf, password)
+    // Scatter and decryption run in parallel
+    const [, raw] = await Promise.all([
+      playScatter(previewWrap, 800),
+      decryptData(loadedEncryptedBuf, password),
+    ])
+
     const type    = raw[0]
     const content = raw.slice(1)
 
@@ -124,7 +130,6 @@ function renderTextResult(text) {
     </div>`
   result.classList.remove('hidden')
 
-  // Re-init lucide for dynamically injected icons
   if (window.__lucideCreateIcons) window.__lucideCreateIcons()
 
   document.getElementById('btn-copy-decoded').addEventListener('click', () => {
@@ -152,7 +157,7 @@ function renderAudioResult(content) {
       <div class="result-label">Voice Note</div>
       <div class="player-wrap">
         <button class="play-btn" id="btn-play-decoded">
-          <i data-lucide="play" id="icon-play-decoded"></i>
+          <i data-lucide="play"  id="icon-play-decoded"></i>
           <i data-lucide="pause" id="icon-pause-decoded" class="hidden"></i>
         </button>
         <div id="time-decoded" class="time-disp">0:00</div>
